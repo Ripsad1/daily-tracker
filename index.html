@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f9f9f7;
+    --surface: #ffffff;
+    --border: #e5e5e0;
+    --border-hover: #c8c8c0;
+    --text: #1a1a18;
+    --muted: #7a7a70;
+    --faint: #f2f2ef;
+
+    --fire: #E24B4A;
+    --fire-bg: #FCEBEB;
+    --fire-border: #f0a0a0;
+    --fire-text: #A32D2D;
+
+    --norm: #378ADD;
+    --norm-bg: #E6F1FB;
+    --norm-border: #85B7EB;
+    --norm-text: #0C447C;
+
+    --low: #BA7517;
+    --low-bg: #FAEEDA;
+    --low-border: #EF9F27;
+    --low-text: #633806;
+
+    --min: #888780;
+    --min-bg: #F1EFE8;
+    --min-border: #B4B2A9;
+    --min-text: #444441;
+
+    --green-bg: #EAF3DE;
+    --green-border: #97C459;
+    --green-text: #3B6D11;
+
+    --amber-bg: #FAEEDA;
+    --amber-border: #EF9F27;
+    --amber-text: #854F0B;
+
+    --teal-bg: #E1F5EE;
+    --teal-border: #5DCAA5;
+    --teal-text: #0F6E56;
+
+    --purple-bg: #EEEDFE;
+    --purple-border: #AFA9EC;
+    --purple-text: #3C3489;
+
+    --success-bg: #EAF3DE;
+    --success-border: #97C459;
+    --success-text: #3B6D11;
+
+    --radius: 8px;
+    --radius-sm: 5px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111110;
+      --surface: #1a1a18;
+      --border: #2a2a28;
+      --border-hover: #44443f;
+      --text: #e8e8e0;
+      --muted: #8a8a80;
+      --faint: #1e1e1c;
+
+      --fire-bg: #2a1212;
+      --fire-border: #7a2020;
+      --fire-text: #f09090;
+
+      --norm-bg: #101c2a;
+      --norm-border: #1d5090;
+      --norm-text: #85B7EB;
+
+      --low-bg: #2a1e08;
+      --low-border: #7a4a0a;
+      --low-text: #EF9F27;
+
+      --min-bg: #1e1e1a;
+      --min-border: #4a4a44;
+      --min-text: #aaa89e;
+
+      --green-bg: #0e1f08;
+      --green-border: #2a5a12;
+      --green-text: #97C459;
+
+      --amber-bg: #1e1408;
+      --amber-border: #6a3e08;
+      --amber-text: #EF9F27;
+
+      --teal-bg: #081e14;
+      --teal-border: #0a5038;
+      --teal-text: #5DCAA5;
+
+      --purple-bg: #100e2a;
+      --purple-border: #3a3480;
+      --purple-text: #AFA9EC;
+
+      --success-bg: #0e1f08;
+      --success-border: #2a5a12;
+      --success-text: #97C459;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 32px 16px 64px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .wrap { max-width: 680px; margin: 0 auto; }
+
+  /* Header */
+  .header { margin-bottom: 28px; }
+  .header h1 {
+    font-size: 22px; font-weight: 500; color: var(--text);
+    margin-bottom: 4px;
+  }
+  .header p { font-size: 13px; color: var(--muted); }
+  .date-display {
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--muted); margin-top: 6px;
+  }
+
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tab {
+    font-size: 13px; padding: 8px 16px; cursor: pointer;
+    color: var(--muted); border-bottom: 2px solid transparent;
+    margin-bottom: -1px; background: none; border-top: none;
+    border-left: none; border-right: none; font-family: 'DM Sans', sans-serif;
+    transition: color 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Track selector */
+  .section-label {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 10px;
+  }
+  .track-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 20px; }
+  .track-btn {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 6px; cursor: pointer; background: var(--surface);
+    text-align: center; transition: all 0.15s; user-select: none;
+  }
+  .track-btn:hover { border-color: var(--border-hover); }
+  .track-btn .icon { font-size: 20px; display: block; margin-bottom: 6px; }
+  .track-btn .name { font-size: 12px; font-weight: 500; display: block; }
+  .track-btn .sub  { font-size: 10px; color: var(--muted); display: block; margin-top: 3px; }
+  .track-btn.active-fire { border-color: var(--fire); background: var(--fire-bg); }
+  .track-btn.active-norm { border-color: var(--norm); background: var(--norm-bg); }
+  .track-btn.active-low  { border-color: var(--low);  background: var(--low-bg);  }
+  .track-btn.active-min  { border-color: var(--min);  background: var(--min-bg);  }
+
+  /* Progress */
+  .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .progress-bar { flex: 1; height: 5px; background: var(--faint); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; background: var(--norm); transition: width 0.3s ease; }
+  .progress-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .time-hint { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+
+  /* Tasks */
+  .task-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .task-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 11px 13px; border: 1px solid var(--border);
+    border-radius: var(--radius); background: var(--surface);
+    cursor: pointer; transition: border-color 0.12s; user-select: none;
+  }
+  .task-item:hover { border-color: var(--border-hover); }
+  .task-item.done { opacity: 0.45; }
+  .task-item.done .task-title { text-decoration: line-through; }
+  .check-box {
+    width: 18px; height: 18px; border-radius: 4px;
+    border: 1px solid var(--border-hover); background: var(--faint);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px; font-size: 11px; color: var(--muted);
+    transition: all 0.12s;
+  }
+  .task-item.done .check-box { background: var(--success-bg); border-color: var(--success-border); color: var(--success-text); }
+  .task-body { flex: 1; min-width: 0; }
+  .task-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .task-detail { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+  .task-time { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); white-space: nowrap; padding-left: 8px; margin-left: auto; flex-shrink: 0; }
+
+  /* Category pills */
+  .cat-pill {
+    display: inline-block; font-size: 10px; padding: 1px 7px;
+    border-radius: 20px; font-weight: 500; margin-right: 6px;
+    border: 1px solid;
+  }
+  .cat-mathe { background: var(--green-bg); color: var(--green-text); border-color: var(--green-border); }
+  .cat-japan { background: var(--amber-bg); color: var(--amber-text); border-color: var(--amber-border); }
+  .cat-medi  { background: var(--teal-bg);  color: var(--teal-text);  border-color: var(--teal-border); }
+  .cat-code  { background: var(--purple-bg);color: var(--purple-text);border-color: var(--purple-border); }
+
+  /* Complete button */
+  .btn-complete {
+    width: 100%; padding: 11px; border-radius: var(--radius);
+    border: 1px solid var(--border-hover); background: var(--surface);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; color: var(--text); transition: all 0.15s;
+  }
+  .btn-complete:hover { border-color: var(--success-border); background: var(--success-bg); color: var(--success-text); }
+  .btn-complete.done-state { border-color: var(--success-border); background: var(--success-bg); color: var(--success-text); }
+  .reset-link {
+    display: block; text-align: right; margin-top: 8px;
+    font-size: 11px; color: var(--muted); cursor: pointer;
+    background: none; border: none; font-family: 'DM Sans', sans-serif;
+    width: 100%;
+  }
+  .reset-link:hover { color: var(--text); }
+
+  /* History stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+  .stat-val { font-size: 26px; font-weight: 500; }
+  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Calendar */
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 10px; }
+  .cal-day {
+    aspect-ratio: 1; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); display: flex; align-items: center;
+    justify-content: center; font-family: 'DM Mono', monospace;
+    font-size: 9px; color: var(--muted); background: var(--surface);
+  }
+  .cal-day.fire-day { background: var(--fire-bg); border-color: var(--fire-border); color: var(--fire-text); }
+  .cal-day.norm-day { background: var(--norm-bg); border-color: var(--norm-border); color: var(--norm-text); }
+  .cal-day.low-day  { background: var(--low-bg);  border-color: var(--low-border);  color: var(--low-text); }
+  .cal-day.min-day  { background: var(--min-bg);  border-color: var(--min-border);  color: var(--min-text); }
+  .cal-day.today    { outline: 2px solid var(--norm); outline-offset: 1px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; border: 1px solid; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <h1>Daily Tracker</h1>
+    <p>Mathematik · Kryptographie · Japanisch · Meditation</p>
+    <div class="date-display" id="date-display"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('today')">Heute</button>
+    <button class="tab" onclick="switchTab('history')">Verlauf</button>
+  </div>
+
+  <!-- TODAY -->
+  <div class="tab-content active" id="tab-today">
+    <div class="section-label">Wie ist dein heutiger Tag?</div>
+    <div class="track-grid">
+      <div class="track-btn" id="btn-fire" onclick="selectTrack('fire')">
+        <span class="icon">🔥</span>
+        <span class="name" style="color:var(--fire-text)">Motiviert</span>
+        <span class="sub">~6 h</span>
+      </div>
+      <div class="track-btn" id="btn-norm" onclick="selectTrack('norm')">
+        <span class="icon">⚡</span>
+        <span class="name" style="color:var(--norm-text)">Normal</span>
+        <span class="sub">~4–5 h</span>
+      </div>
+      <div class="track-btn" id="btn-low" onclick="selectTrack('low')">
+        <span class="icon">🍃</span>
+        <span class="name" style="color:var(--low-text)">Wenig Energie</span>
+        <span class="sub">~2–3 h</span>
+      </div>
+      <div class="track-btn" id="btn-min" onclick="selectTrack('min')">
+        <span class="icon">🌙</span>
+        <span class="name" style="color:var(--min-text)">Schlechtester Tag</span>
+        <span class="sub">~45 min</span>
+      </div>
+    </div>
+
+    <div id="checklist-area" style="display:none">
+      <div class="progress-row">
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+        <div class="progress-label" id="prog-label">0 / 0</div>
+      </div>
+      <div class="time-hint" id="time-hint"></div>
+      <div class="task-list" id="task-list"></div>
+      <button class="btn-complete" id="btn-complete" onclick="completeDay()">✓ &nbsp;Tag abschließen</button>
+      <button class="reset-link" onclick="resetToday()">Heute zurücksetzen</button>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="tab-content" id="tab-history">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="s-streak">0</div><div class="stat-lbl">🔥 Streak</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-total">0</div><div class="stat-lbl">📅 Tage gesamt</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-best">0</div><div class="stat-lbl">🏆 Bester Streak</div></div>
+    </div>
+    <div class="section-label">Letzte 35 Tage</div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--fire-bg);border-color:var(--fire-border)"></div>Motiviert</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--norm-bg);border-color:var(--norm-border)"></div>Normal</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--low-bg);border-color:var(--low-border)"></div>Wenig Energie</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--min-bg);border-color:var(--min-border)"></div>Schlechtester Tag</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const TRACKS = {
+  fire: { label:'Motivierter Tag (~6 h)', tasks: [
+    { cat:'mathe', title:'Bachelorarbeit',             detail:'120 min – ambitioniertes Tagesziel, fokussiertes Schreiben oder Rechnen ohne Ablenkung', time:'120 min' },
+    { cat:'mathe', title:'Topologie (Prio 1)',          detail:'60 min – Beweise selbst herleiten, Übungsaufgaben lösen, ein neues Kapitel erarbeiten', time:'60 min' },
+    { cat:'mathe', title:'Algebra (Prio 2)',            detail:'45 min – Vorlesung vor-/nachbereiten, einen Satz vollständig beweisen', time:'45 min' },
+    { cat:'mathe', title:'Algebraische Topologie (Prio 2)', detail:'30 min – Skript lesen, Verbindungen zur Topologie notieren', time:'30 min' },
+    { cat:'code',  title:'Python / Kryptographie',     detail:'60 min – neue Konzepte implementieren: ECC, AES, Cryptopals-Challenge oder Boneh-Kurs', time:'60 min' },
+    { cat:'japan', title:'Japanisch – Chatbot-Gespräch', detail:'25 min Gespräch auf Japanisch führen (Claude, Tandem o.ä.) – freies Sprechen üben', time:'25 min' },
+    { cat:'medi',  title:'Meditation',                 detail:'10 min – Körperscan oder Atemübung, idealerweise morgens oder nach dem Lernen', time:'10 min' },
+  ]},
+  norm: { label:'Normaler Tag (~4–5 h)', tasks: [
+    { cat:'mathe', title:'Bachelorarbeit',             detail:'90 min – gestern offene Frage aufgreifen, solides kontinuierliches Arbeiten', time:'90 min' },
+    { cat:'mathe', title:'Topologie (Prio 1)',          detail:'45 min – einen Beweis nachvollziehen, Definitionen festigen, eine Aufgabe lösen', time:'45 min' },
+    { cat:'mathe', title:'Algebra oder Alg. Topologie', detail:'30 min – je nach Vorlesung: Notizen sichten oder einen Satz nachbeweisen', time:'30 min' },
+    { cat:'code',  title:'Python / Kryptographie',     detail:'45 min – bestehenden Code ausbauen oder nächste Aufgabe aus dem 3-Monats-Plan', time:'45 min' },
+    { cat:'japan', title:'Japanisch – Video + Karteikarten', detail:'Video zu Vokabular/Grammatik schauen, 10 neue Anki-Karten erstellen', time:'25 min' },
+    { cat:'medi',  title:'Meditation',                 detail:'10 min', time:'10 min' },
+  ]},
+  low: { label:'Energie-armer Tag (~2–3 h)', tasks: [
+    { cat:'mathe', title:'Bachelorarbeit',             detail:'45 min – nur lesen, Quellen sichten oder Gliederung reviewen, kein Schreibdruck', time:'45 min' },
+    { cat:'mathe', title:'Topologie (Prio 1)',          detail:'30 min – Definitionen und Sätze passiv lesen, kein vollständiger Beweis nötig', time:'30 min' },
+    { cat:'mathe', title:'Algebra oder Alg. Topologie', detail:'20 min – Vorlesungsnotizen überfliegen, einen Begriff nachschlagen', time:'20 min' },
+    { cat:'code',  title:'Kryptographie – nur lesen',  detail:'20 min Hoffstein lesen oder Boneh-Video schauen, kein Code-Schreiben nötig', time:'20 min' },
+    { cat:'japan', title:'Japanisch – nur Karteikarten', detail:'Nur bestehende Anki-Karten wiederholen, 10–15 min reichen', time:'15 min' },
+    { cat:'medi',  title:'Meditation',                 detail:'10 min – heute besonders wichtig', time:'10 min' },
+  ]},
+  min: { label:'Schlechtester Tag (~45 min)', tasks: [
+    { cat:'mathe', title:'Bachelorarbeit – nur berühren', detail:'15 min – eine Seite lesen oder eine einzige Notiz schreiben, Hauptsache der Faden bleibt', time:'15 min' },
+    { cat:'mathe', title:'Topologie – passiv',          detail:'10 min – einen Satz oder eine Definition lesen, kein Druck', time:'10 min' },
+    { cat:'japan', title:'Japanisches Videospiel',      detail:'So lange du willst – Japanisch passiv aufnehmen, kein Lernstress', time:'beliebig' },
+    { cat:'medi',  title:'Meditation',                  detail:'10 min – heute am wichtigsten', time:'10 min' },
+  ]},
+};
+
+const CAT = { mathe:'Mathe', japan:'日本語', medi:'Meditation', code:'Code/Krypto' };
+let state = { track:null, checks:{}, done:false };
+let history = {};
+
+function todayKey() { return new Date().toISOString().slice(0,10); }
+
+function save() {
+  localStorage.setItem('dt-history', JSON.stringify(history));
+  localStorage.setItem('dt-today', JSON.stringify({ date: todayKey(), state }));
+}
+
+function load() {
+  try { history = JSON.parse(localStorage.getItem('dt-history') || '{}'); } catch(e) { history={}; }
+  try {
+    const d = JSON.parse(localStorage.getItem('dt-today') || 'null');
+    if (d && d.date === todayKey()) {
+      state = d.state;
+      if (state.track) { activateTrackBtn(state.track); renderChecklist(); }
+      if (state.done) markDone();
+    }
+  } catch(e) {}
+  const now = new Date();
+  document.getElementById('date-display').textContent =
+    now.toLocaleDateString('de-DE', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  renderHistory();
+}
+
+function selectTrack(t) {
+  if (state.done) return;
+  state = { track:t, checks:{}, done:false };
+  ['fire','norm','low','min'].forEach(k => {
+    document.getElementById('btn-'+k).className = 'track-btn' + (k===t ? ' active-'+k : '');
+  });
+  renderChecklist(); save();
+}
+
+function activateTrackBtn(t) {
+  ['fire','norm','low','min'].forEach(k => {
+    document.getElementById('btn-'+k).className = 'track-btn' + (k===t ? ' active-'+t : '');
+  });
+}
+
+function renderChecklist() {
+  const tasks = TRACKS[state.track].tasks;
+  document.getElementById('checklist-area').style.display = 'block';
+  const mins = tasks.reduce((s,t) => s + (parseInt(t.time)||0), 0);
+  const h = Math.floor(mins/60), m = mins%60;
+  document.getElementById('time-hint').textContent =
+    'Gesamtzeit: ~' + (h ? h+'h ' : '') + (m ? m+' min' : '');
+  const list = document.getElementById('task-list');
+  list.innerHTML = '';
+  tasks.forEach((task, i) => {
+    const done = !!state.checks[i];
+    const el = document.createElement('div');
+    el.className = 'task-item' + (done ? ' done' : '');
+    el.onclick = () => { if (!state.done) { state.checks[i] = !state.checks[i]; renderChecklist(); save(); } };
+    el.innerHTML =
+      '<div class="check-box">' + (done ? '✓' : '') + '</div>' +
+      '<div class="task-body">' +
+        '<div class="task-title"><span class="cat-pill cat-'+task.cat+'">'+CAT[task.cat]+'</span>'+task.title+'</div>' +
+        '<div class="task-detail">'+task.detail+'</div>' +
+      '</div>' +
+      '<div class="task-time">'+task.time+'</div>';
+    list.appendChild(el);
+  });
+  const done = Object.values(state.checks).filter(Boolean).length;
+  const total = tasks.length;
+  document.getElementById('prog-fill').style.width = Math.round(done/total*100) + '%';
+  document.getElementById('prog-label').textContent = done + ' / ' + total;
+}
+
+function completeDay() {
+  if (!state.track || state.done) return;
+  const tasks = TRACKS[state.track].tasks;
+  history[todayKey()] = {
+    track: state.track,
+    done: Object.values(state.checks).filter(Boolean).length,
+    total: tasks.length
+  };
+  state.done = true;
+  save(); renderHistory(); markDone();
+}
+
+function markDone() {
+  const btn = document.getElementById('btn-complete');
+  btn.textContent = '✓  Tag abgeschlossen!';
+  btn.className = 'btn-complete done-state';
+}
+
+function resetToday() {
+  state = { track:null, checks:{}, done:false };
+  ['fire','norm','low','min'].forEach(k => document.getElementById('btn-'+k).className = 'track-btn');
+  document.getElementById('checklist-area').style.display = 'none';
+  const btn = document.getElementById('btn-complete');
+  btn.textContent = '✓  Tag abschließen';
+  btn.className = 'btn-complete';
+  save();
+}
+
+function renderHistory() {
+  const today = todayKey();
+  const days = Array.from({length:35}, (_,i) => {
+    const d = new Date(); d.setDate(d.getDate()-(34-i));
+    return d.toISOString().slice(0,10);
+  });
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  days.forEach(k => {
+    const data = history[k];
+    const el = document.createElement('div');
+    el.className = 'cal-day' + (data ? ' '+data.track+'-day' : '') + (k===today ? ' today' : '');
+    el.textContent = parseInt(k.slice(8));
+    if (data) el.title = k + ': ' + data.done + '/' + data.total + ' erledigt';
+    grid.appendChild(el);
+  });
+  const keys = Object.keys(history).sort();
+  document.getElementById('s-total').textContent = keys.length;
+  let streak=0, best=0, cur=0, prev=null;
+  keys.forEach(k => {
+    cur = prev && (new Date(k)-new Date(prev))/86400000===1 ? cur+1 : 1;
+    if (cur>best) best=cur; prev=k;
+  });
+  if (prev===today || prev===days[34]) streak=cur;
+  document.getElementById('s-streak').textContent = streak;
+  document.getElementById('s-best').textContent = best;
+}
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.textContent.toLowerCase().includes(t==='today'?'heute':'verlauf')));
+  document.getElementById('tab-today').classList.toggle('active', t==='today');
+  document.getElementById('tab-history').classList.toggle('active', t==='history');
+}
+
+load();
+</script>
+</body>
+</html>
